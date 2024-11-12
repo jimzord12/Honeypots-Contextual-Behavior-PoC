@@ -1,0 +1,28 @@
+meta {
+  name: Create Attack
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": 1,
+    "source_ip": "192.192.1.120",
+    "dest_ip": "120.1.192.192",
+    "protocol": "http",
+      "payload": {
+          "command": "SELECT * FROM users WHERE username = 'admin' --';"
+      },
+      "http_headers": {
+          "User-Agent": "Mozilla/5.0 (compatible; SQLInjector/1.0)",
+          "Content-Type": "application/x-www-form-urlencoded"
+      }
+    
+  }
+}

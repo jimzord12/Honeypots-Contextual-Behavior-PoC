@@ -1,0 +1,8 @@
+honeypot-name: "my-honey-pot2"
+port: 3000
+headers:
+  "Server": "nginx"
+
+logging:
+  transport: file
+  filename: "./logs/attacks.log" # Centralized log file location

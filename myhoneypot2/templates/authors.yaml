@@ -1,0 +1,34 @@
+id: sqli-error
+info:
+  title: "SQL error honeytrap"
+requests:
+  - isTrap: false
+    expect:
+      method: GET
+      path: "/authors"
+    reply:
+      status: 200
+      headers:
+        content-type: "text/html"
+      body:
+        contents: "this is the author page"
+  - isTrap: false
+    expect:
+      method: GET
+      path: "/authors/:Id([0-9]+)"
+    reply:
+      status: 200
+      headers:
+        content-type: "text/html"
+      body:
+        contents: "this is some Author"
+  - isTrap: true
+    expect:
+      method: GET
+      path: "/authors/:Id"
+    reply:
+      status: 200
+      headers:
+        content-type: "text/html"
+      body:
+        contents: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 2"
