@@ -1,0 +1,4 @@
+honeypot-name: 'my-honey-pot'
+port: 3000
+headers:
+    'Server': 'nginx'
