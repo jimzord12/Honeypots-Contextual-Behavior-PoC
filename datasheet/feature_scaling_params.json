@@ -1,0 +1,22 @@
+{
+    "Weight": {
+        "min": 3.0,
+        "max": 10.0
+    },
+    "Num_Attempts": {
+        "min": 2.0,
+        "max": 99.0
+    },
+    "Duration": {
+        "min": 0.396,
+        "max": 59.965
+    },
+    "Headers_Complexity": {
+        "min": 1.891,
+        "max": 7.165
+    },
+    "Payload_Complexity": {
+        "min": 0.78,
+        "max": 4.183
+    }
+}
