@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:8080
+  url: http://localhost:8080/create-attack
   body: json
   auth: none
 }
@@ -16,13 +16,12 @@ body:json {
     "source_ip": "192.192.1.120",
     "dest_ip": "120.1.192.192",
     "protocol": "http",
-      "payload": {
-          "command": "SELECT * FROM users WHERE username = 'admin' --';"
-      },
-      "http_headers": {
-          "User-Agent": "Mozilla/5.0 (compatible; SQLInjector/1.0)",
-          "Content-Type": "application/x-www-form-urlencoded"
-      }
-    
+    "payload": {
+      "command": "SELECT * FROM users WHERE username = 'admin' --';"
+    },
+    "http_headers": {
+      "User-Agent": "Mozilla/5.0 (compatible; SQLInjector/1.0)",
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
   }
 }
