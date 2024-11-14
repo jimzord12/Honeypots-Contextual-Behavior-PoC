@@ -17,6 +17,15 @@ const (
 	BruteForceLogin
 )
 
+type SkillLevel int
+
+const (
+	Low = iota + 1
+	MediumLow
+	MediumHigh
+	High
+)
+
 // Attack represents an attack record
 type Attack struct {
 	gorm.Model
@@ -29,6 +38,8 @@ type Attack struct {
 	Payload     datatypes.JSON `gorm:"type:TEXT"` // Store JSON as TEXT
 	HttpHeaders datatypes.JSON `gorm:"type:TEXT"` // Store JSON as TEXT
 	Path        string         `gorm:"size:120"`
+	SkillScore  *float32       `gorm:"type:float"`
+	SkillLevel  *SkillLevel    `gorm:"type:integer"`
 }
 
 // Session represents a session record

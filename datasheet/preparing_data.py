@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
 
-def load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\synthetic_attacks.csv'):
+def load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\files\synthetic_attacks.csv'):
     # """
     # Loads the synthetic attacks dataset from a CSV file.
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # print(df_encoded[features_to_scale].head())
 
     # Save the Scaled Dataset for Future Use
-    df_encoded.to_csv('encoded_scaled_attacks.csv', index=False)
+    df_encoded.to_csv('logs/encoded_scaled_attacks.csv', index=False)
     print("\nFeature scaling completed and saved to 'encoded_scaled_attacks.csv'.\n")
 
     ##########################################################################################

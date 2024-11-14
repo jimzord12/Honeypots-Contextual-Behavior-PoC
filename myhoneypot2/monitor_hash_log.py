@@ -1,114 +1,97 @@
 import json
-import re
+import time
+import requests
+from dotenv import load_dotenv
+import os
 
-def calculate_headers_complexity(headers):
-    """
-    Calculate headers complexity with adjustments to reduce inflated scores.
-    Factors considered: number of unique headers and scaled average length of headers.
-    """
-    if not headers:
-        return 0
-    
-    # Number of unique headers, scaled down
-    num_headers = len(headers) / 2
-    
-    # Average length of header names and values, scaled further
-    avg_length = sum(len(k) + len(str(v)) for k, v in headers.items()) / len(headers) / 5
-    
-    # Complexity formula: normalize with a smaller impact for header number and average length
-    complexity_score = (num_headers + avg_length) / 2
-    
-    # Scale the result to make it reasonable, capping at a maximum score of 10
-    complexity_score = min(complexity_score, 10)
-    return round(complexity_score, 3)
+load_dotenv()
 
+def determine_attack_type(title):
+    # Map keywords to attack types (case insensitive)
+    if "sql" in title.lower():
+        return 1  # SQL Injection
+    elif "xss" in title.lower():
+        return 2  # XSS Attack
+    elif "dos" in title.lower():
+        return 3  # DOS Attack
+    elif "scanning" in title.lower():
+        return 4  # Port Scanning
+    elif "brute force" in title.lower() or "bruteforce" in title.lower():
+        return 5  # Brute Force Login
+    else:
+        return None  # Unknown type
 
-def calculate_payload_complexity(payload):
-    """
-    Calculate payload complexity based on the length of the payload,
-    presence of special characters, and JSON structure depth if applicable.
-    """
-    if not payload:
-        return 0
-    
-    # Convert payload to string if it's a JSON object
-    payload_str = json.dumps(payload) if isinstance(payload, (dict, list)) else str(payload)
-    
-    # Base complexity on length of the payload
-    length_score = len(payload_str) / 100  # Scale by 100 for simplicity
-    
-    # Special characters presence: Detect common attack patterns
-    special_chars = len(re.findall(r'[\'"<>%;()&+]', payload_str)) / 10  # Scale down by 10
-    
-    # Depth of JSON structure (if applicable)
-    def calculate_depth(obj, level=1):
-        if isinstance(obj, dict):
-            return level + max((calculate_depth(v, level + 1) for v in obj.values()), default=0)
-        elif isinstance(obj, list):
-            return level + max((calculate_depth(i, level + 1) for i in obj), default=0)
-        return level
+def send_to_server(data):
+    url = os.getenv("GO_SERVER_URL")
+    headers = {'Content-Type': 'application/json'}
 
-    structure_depth = calculate_depth(payload) if isinstance(payload, (dict, list)) else 1
-    
-    # Complexity formula: (length_score + special_chars + structure_depth) / 3
-    complexity_score = (length_score + special_chars + structure_depth) / 3
-    return round(complexity_score, 3)
-
-
-def calculate_complexity(headers_json, payload_json):
-    """
-    Main function to calculate both headers and payload complexity.
-    Takes headers and payload as JSON objects and returns a complexity score.
-    """
     try:
-        headers = json.loads(headers_json)
-        payload = json.loads(payload_json)
-        
-        headers_complexity = calculate_headers_complexity(headers)
-        payload_complexity = calculate_payload_complexity(payload)
-        
-        return {
-            "headers_complexity": headers_complexity,
-            "payload_complexity": payload_complexity
-        }
-    
-    except json.JSONDecodeError as e:
-        return {"error": f"Invalid JSON input: {e}"}
+        response = requests.post(url, json=data, headers=headers)
+        if response.status_code == 201:
+            print("Successfully sent log entry to Go server.")
+        else:
+            print(f"Failed to send log entry: {response.status_code} - {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending log entry to server: {e}")
 
+def monitor_log_file(filepath, output_json):
+    with open(filepath, 'r') as file, open(output_json, 'a') as json_file:
+        file.seek(0, 2)  # Move to the end of the file
 
-# Example usage
-headers_json = """
-{
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-    "Content-Type": "application/json",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-    "Cookie": "sessionid=abc123; csrftoken=xyz456",
-    "X-Forwarded-For": "192.168.1.1, 192.168.1.2",
-    "Referer": "https://www.example.com/login",
-    "X-CSRF-Token": "Y29udGV4dDpyZWFjdC1hcHA="
-    }
-    """
-payload_json = """
-{
-    "username": "admin",
-    "password": "pa$$w0rd!",
-    "attempts": 5,
-    "metadata": {
-        "ip_address": "192.168.1.1",
-        "location": {"city": "New York", "country": "USA"},
-        "device": {
-            "os": "Windows 10",
-            "browser": {"name": "Chrome", "version": "91.0.4472.124"}
-        }
-    },
-    "data": [
-        {"id": 1, "type": "file_upload", "status": "success"},
-        {"id": 2, "type": "login_attempt", "status": "failed"}
-    ],
-    "message": "<script>alert('XSS')</script>"
-}
-"""
+        print(f"Monitoring {filepath} for relevant log entries...\n")
 
-complexity_scores = calculate_complexity(headers_json, payload_json)
-print(complexity_scores)
+        while True:
+            line = file.readline()
+            if not line:
+                time.sleep(1)
+                continue
+
+            try:
+                log_entry = json.loads(line.strip())
+                
+                # Filter for logs with specific structure
+                if (
+                    "http" in log_entry and
+                    "info" in log_entry and
+                    "type" in log_entry and
+                    log_entry["type"] == "malicious"
+                ):
+                    print("HTTP: ", log_entry["http"])
+                    print("INFO: ", log_entry["info"].get("title"))
+                    # Determine attack type based on the title in info
+                    attack_type = determine_attack_type(log_entry["info"].get("title"))
+                    print("Attack Type: ", attack_type)
+                    if attack_type is None:
+                        print("Problem: Unable to determine attack type for entry. (Or json had an empty line resulting to another iteration)")
+                        continue  # Skip if the attack type is unknown
+
+                    # Construct a dictionary with the relevant fields
+                    formatted_log = {
+                        "source_ip": log_entry["http"].get("client_ip"),
+                        "dest_ip": "localhost",  # Set as honeypot IP or change as needed
+                        "protocol": "HTTP",
+                        "payload": log_entry["request"].get("body", {}),
+                        "http_headers": log_entry["request"].get("headers", {}),
+                        "path": log_entry["http"].get("path"),
+                        "type": attack_type  # Add the attack type as determined
+                    }
+
+                    # Write the formatted log entry to JSON file
+                    json.dump(formatted_log, json_file)
+                    json_file.write("\n")  # Add newline for readability
+                    
+                    # Send the formatted log entry to the Go server
+                    send_to_server(formatted_log)
+
+                    # Print confirmation to console
+                    print("Relevant log entry with attack type processed and sent:")
+                    print(json.dumps(formatted_log, indent=2))
+                    print("\n---\n")
+
+            except json.JSONDecodeError:
+                print("Failed to decode log entry as JSON:", line)
+
+if __name__ == "__main__":
+    log_file_path = "./logs/attacks.log"
+    output_json_path = "./logs/filtered_attacks.json"
+    monitor_log_file(log_file_path, output_json_path)

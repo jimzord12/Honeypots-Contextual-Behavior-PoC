@@ -2,7 +2,9 @@ package server
 
 import (
 	"apiserver/db"
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -40,7 +42,7 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) addAttack(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Incoming request: %v", r)
+	log.Printf("Incoming request: %+v", r)
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -57,6 +59,7 @@ func (s *Server) addAttack(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields() // Prevent unknown fields
 
 	if err := decoder.Decode(&req); err != nil {
+		fmt.Print("Problem Decoding the Request's Body")
 		http.Error(w, "Bad request: "+err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -68,6 +71,7 @@ func (s *Server) addAttack(w http.ResponseWriter, r *http.Request) {
 
 	// Marshal Payload and HttpHeaders to JSON
 	payloadJSON, err := json.Marshal(req.Payload)
+	fmt.Printf("REQUEST Payload: %+v", req.Payload)
 	if err != nil {
 		http.Error(w, "Invalid payload: "+err.Error(), http.StatusBadRequest)
 		return
@@ -75,6 +79,7 @@ func (s *Server) addAttack(w http.ResponseWriter, r *http.Request) {
 
 	headersJSON, err := json.Marshal(req.HttpHeaders)
 	if err != nil {
+		fmt.Printf("REQUEST HEADERS: %+v", req.HttpHeaders)
 		http.Error(w, "Invalid HTTP headers: "+err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -99,4 +104,50 @@ func (s *Server) addAttack(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(response)
 
+	// Send the attack to the FastAPI server for further processing
+	go forwardToMLModel(*attack)
+
+}
+
+// forwardToMLModel sends the attack data to the FastAPI server
+func forwardToMLModel(attack db.Attack) {
+	// Define the FastAPI endpoint URL
+	fastAPIURL := "http://localhost:8000/process-attack"
+
+	// Prepare the attack data as JSON
+	attackData := map[string]interface{}{
+		"id":           attack.ID,
+		"type":         attack.Type,
+		"timestamp":    attack.Timestamp,
+		"source_ip":    attack.SourceIP,
+		"dest_ip":      attack.DestIP,
+		"protocol":     attack.Protocol,
+		"payload":      json.RawMessage(attack.Payload),
+		"http_headers": json.RawMessage(attack.HttpHeaders),
+		"path":         attack.Path,
+		"skill_score":  attack.SkillScore,
+		"skill_level":  attack.SkillLevel,
+	}
+
+	// Convert attack data to JSON
+	jsonData, err := json.Marshal(attackData)
+	if err != nil {
+		log.Printf("Failed to marshal attack data: %v", err)
+		return
+	}
+
+	// Send the JSON data to the FastAPI server
+	resp, err := http.Post(fastAPIURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Printf("Failed to send attack data to FastAPI server: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Log the response from the FastAPI server
+	if resp.StatusCode == http.StatusOK {
+		log.Print("Attack data successfully sent to FastAPI server")
+	} else {
+		log.Printf("FastAPI server returned status %d", resp.StatusCode)
+	}
 }

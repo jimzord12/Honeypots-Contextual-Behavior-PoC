@@ -21,6 +21,6 @@ func CreateAttack_DB(atk *Attack) error {
 	}
 
 	log.Printf("createAttack_DB: Attack record created successfully")
-	log.Printf("\n\nThe attack record: %v", atk)
+	log.Printf("\n\nThe attack record: %+v", atk)
 	return nil
 }

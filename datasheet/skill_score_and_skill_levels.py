@@ -12,7 +12,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 # Load the scaled data
 # Load the scaled data
-df_scaled = load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\encoded_scaled_attacks.csv')
+df_scaled = load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\files\encoded_scaled_attacks.csv')
 
 # ### K-Mean Clusters ###
 # # Define the optimal number of clusters
@@ -144,7 +144,7 @@ print("First 5 Skill Scores:")
 print(df_scaled[['Skill_Score']].head())
 
 # Save the updated dataset
-df_scaled.to_csv('clustered_attacks_with_skill_score.csv', index=False)
+df_scaled.to_csv('logs/clustered_attacks_with_skill_score.csv', index=False)
 print("Skill Score calculated and saved to 'clustered_attacks_with_skill_score.csv'.")
 
 # Plot Histogram using Matplotlib
@@ -174,7 +174,7 @@ print("First 5 Normalized Skill Scores:")
 print(df_scaled[['Skill_Score_Normalized']].head())
 
 # Save the updated dataset
-df_scaled.to_csv('clustered_attacks_with_normalized_skill_score.csv', index=False)
+df_scaled.to_csv('logs/clustered_attacks_with_normalized_skill_score.csv', index=False)
 print("Normalized Skill Score calculated and saved to 'clustered_attacks_with_normalized_skill_score.csv'.")
 
 plt.figure(figsize=(10, 6))
@@ -209,7 +209,7 @@ print("First 5 Skill Level Assignments:")
 print(df_scaled[['Skill_Score_Normalized', 'Skill_Level']].head())
 
 # Save the updated dataset
-df_scaled.to_csv('final_attacks_with_skill_levels.csv', index=False)
+df_scaled.to_csv('logs/final_attacks_with_skill_levels.csv', index=False)
 print("Skill Levels assigned and saved to 'final_clustered_attacks_with_skill_levels.csv'.")
 
 plt.figure(figsize=(10, 6))
