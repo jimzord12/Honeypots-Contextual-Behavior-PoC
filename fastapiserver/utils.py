@@ -1,8 +1,15 @@
 import json
 import re
+from dotenv import load_dotenv
+import os
+from pathlib import Path
+
+load_dotenv()
+
+root_path = Path(os.getenv("ROOT_PATH"))
 
 def get_min_max_values():
-    json_file = r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\feature_scaling_params.json'
+    json_file = root_path / 'datasheet/feature_scaling_params.json'
     try:
         with open(json_file, 'r') as f:
             scaling_params = json.load(f)

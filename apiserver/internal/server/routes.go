@@ -15,8 +15,60 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/", s.HelloWorldHandler)
 	mux.HandleFunc("/health", s.healthHandler)
 	mux.HandleFunc("/create-attack", s.addAttack)
+	mux.HandleFunc("/reset-db", s.resetDatabaseHandler)
 
-	return mux
+	// Wrap the mux with a custom NotFound handler
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, pattern := mux.Handler(r); pattern == "" {
+			s.notFound(w, r)
+			return
+		}
+		mux.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) resetDatabaseHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Call the ResetDatabase function
+	err := db.ResetDatabase()
+	if err != nil {
+		http.Error(w, "Failed to reset the database", http.StatusInternalServerError)
+		log.Printf("Database reset error: %v", err)
+		return
+	}
+
+	// Respond with success
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := map[string]string{
+		"message": "Database reset successfully",
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) notFound(w http.ResponseWriter, r *http.Request) {
+	resp := map[string]string{
+		"message": "Resource not found",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNotFound)
+
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Printf("Failed to marshal JSON in notFound handler: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(jsonResp)
+	if err != nil {
+		log.Printf("Failed to write response in notFound handler: %v", err)
+	}
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {

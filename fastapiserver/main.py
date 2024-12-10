@@ -14,11 +14,12 @@ import traceback
 
 load_dotenv()
 
+root_path = Path(os.getenv("ROOT_PATH"))
+model = joblib.load(root_path / os.getenv("MODEL_PATH"))
+
 app = FastAPI()
 
-model = joblib.load(Path(os.getenv("ROOT_PATH")) / os.getenv("MODEL_PATH"))
-
-DATABASE = Path(os.getenv("SQLITE_DB_URL"))
+DATABASE = root_path / os.getenv("SQLITE_DB_URL")
 
 # Pydantic model to receive attack data
 class Attack(BaseModel):
@@ -83,7 +84,7 @@ def predict_skill_level(skill_score: float) -> int:
 
 def update_database(attack_id: int, skill_score: float, skill_level: int):
     print("DATABASE:", DATABASE)
-    print("MODEL Path: ", Path(os.getenv("MODEL_URL")))
+    print("MODEL Path: ", root_path / os.getenv("MODEL_PATH"))
 
     # Update the SQLite database with the new skill_score and skill_level
     conn = sqlite3.connect(DATABASE)
@@ -98,6 +99,10 @@ def update_database(attack_id: int, skill_score: float, skill_level: int):
 # Function to find the key(s) by value
 def get_key_by_value(dictionary, target_value):
     return [key for key, value in dictionary.items() if value == target_value]
+
+@app.get("/")
+async def homepage():
+     return {"message": "The FastAPI Python Server is working"}
 
 @app.post("/process-attack")
 async def process_attack(attack: Attack):

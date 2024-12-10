@@ -3,41 +3,65 @@ import time
 import requests
 from dotenv import load_dotenv
 import os
+import signal
+import sys
 
 load_dotenv()
 
+def signal_handler(sig, frame):
+    print("\nExiting...")
+    sys.exit(0)
+
+# Register signal handler
+signal.signal(signal.SIGINT, signal_handler)
+
 def determine_attack_type(title):
-    # Map keywords to attack types (case insensitive)
     if "sql" in title.lower():
-        return 1  # SQL Injection
+        return 1
     elif "xss" in title.lower():
-        return 2  # XSS Attack
+        return 2
     elif "dos" in title.lower():
-        return 3  # DOS Attack
+        return 3
     elif "scanning" in title.lower():
-        return 4  # Port Scanning
+        return 4
     elif "brute force" in title.lower() or "bruteforce" in title.lower():
-        return 5  # Brute Force Login
-    else:
-        return None  # Unknown type
+        return 5
+    return None
 
 def send_to_server(data):
     url = os.getenv("GO_SERVER_URL")
     headers = {'Content-Type': 'application/json'}
 
     try:
-        response = requests.post(url, json=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers, timeout=10)
         if response.status_code == 201:
             print("Successfully sent log entry to Go server.")
         else:
             print(f"Failed to send log entry: {response.status_code} - {response.text}")
+    except requests.exceptions.Timeout:
+        print("Request timed out while sending log entry to server.")
     except requests.exceptions.RequestException as e:
         print(f"Error sending log entry to server: {e}")
+
+def ping_go_server():
+    print("Waiting for 5 seconds before pinging the Go server...")
+    time.sleep(5)  # Delay for 5 seconds
+
+    try:
+        port = os.getenv("GO_SERVER_PORT")
+        url = f"http://localhost:{port}/"
+        headers = {'Content-Type': 'application/json'}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            print("Successfully connected to Go server.")
+        else:
+            print(f"Failed to connect to Go server: {response.status_code} - {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error connecting to Go server: {e}")
 
 def monitor_log_file(filepath, output_json):
     with open(filepath, 'r') as file, open(output_json, 'a') as json_file:
         file.seek(0, 2)  # Move to the end of the file
-
         print(f"Monitoring {filepath} for relevant log entries...\n")
 
         while True:
@@ -48,50 +72,37 @@ def monitor_log_file(filepath, output_json):
 
             try:
                 log_entry = json.loads(line.strip())
-                
-                # Filter for logs with specific structure
                 if (
                     "http" in log_entry and
                     "info" in log_entry and
                     "type" in log_entry and
                     log_entry["type"] == "malicious"
                 ):
-                    print("HTTP: ", log_entry["http"])
-                    print("INFO: ", log_entry["info"].get("title"))
-                    # Determine attack type based on the title in info
                     attack_type = determine_attack_type(log_entry["info"].get("title"))
-                    print("Attack Type: ", attack_type)
                     if attack_type is None:
-                        print("Problem: Unable to determine attack type for entry. (Or json had an empty line resulting to another iteration)")
-                        continue  # Skip if the attack type is unknown
+                        print("Unable to determine attack type. Skipping entry.")
+                        continue
 
-                    # Construct a dictionary with the relevant fields
                     formatted_log = {
                         "source_ip": log_entry["http"].get("client_ip"),
-                        "dest_ip": "localhost",  # Set as honeypot IP or change as needed
+                        "dest_ip": os.getenv("HONEYPOT_IP", "localhost"),
                         "protocol": "HTTP",
                         "payload": log_entry["request"].get("body", {}),
                         "http_headers": log_entry["request"].get("headers", {}),
                         "path": log_entry["http"].get("path"),
-                        "type": attack_type  # Add the attack type as determined
+                        "type": attack_type
                     }
 
-                    # Write the formatted log entry to JSON file
                     json.dump(formatted_log, json_file)
-                    json_file.write("\n")  # Add newline for readability
-                    
-                    # Send the formatted log entry to the Go server
+                    json_file.write("\n")
                     send_to_server(formatted_log)
-
-                    # Print confirmation to console
-                    print("Relevant log entry with attack type processed and sent:")
-                    print(json.dumps(formatted_log, indent=2))
-                    print("\n---\n")
+                    print("Processed and sent:", json.dumps(formatted_log, indent=2))
 
             except json.JSONDecodeError:
                 print("Failed to decode log entry as JSON:", line)
 
 if __name__ == "__main__":
+    ping_go_server()
     log_file_path = "./logs/attacks.log"
     output_json_path = "./logs/filtered_attacks.json"
     monitor_log_file(log_file_path, output_json_path)
