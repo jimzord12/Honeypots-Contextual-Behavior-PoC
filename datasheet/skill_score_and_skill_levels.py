@@ -12,7 +12,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 # Load the scaled data
 # Load the scaled data
-df_scaled = load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\files\encoded_scaled_attacks.csv')
+df_scaled = load_data(file_path=r'datasheet\files\encoded_scaled_attacks.csv')
 
 # ### K-Mean Clusters ###
 # # Define the optimal number of clusters

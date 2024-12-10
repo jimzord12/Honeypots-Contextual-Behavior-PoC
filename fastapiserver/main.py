@@ -16,7 +16,7 @@ load_dotenv()
 
 app = FastAPI()
 
-model = joblib.load(Path(os.getenv("MODEL_URL")))
+model = joblib.load(Path(os.getenv("ROOT_PATH")) / os.getenv("MODEL_PATH"))
 
 DATABASE = Path(os.getenv("SQLITE_DB_URL"))
 

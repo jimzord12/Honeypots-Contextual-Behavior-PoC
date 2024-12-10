@@ -4,7 +4,16 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\files\synthetic_attacks.csv'):
+from dotenv import load_dotenv
+from pathlib import Path
+
+load_dotenv()
+root_path = Path(os.getenv("ROOT_PATH"))
+
+# .env
+# ROOT_PATH="/home/jimzord-wsl/honeypot-poc/Honeypots-Contextual-Behavior-PoC/"
+
+def load_data(file_path=None):
     # """
     # Loads the synthetic attacks dataset from a CSV file.
 
@@ -14,6 +23,12 @@ def load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavio
     # Returns:
     # - df (pd.DataFrame): The loaded DataFrame.
     # """
+
+    if file_path is None:
+        file_path = root_path / "datasheet/files/synthetic_attacks.csv"
+    else:
+        file_path = root_path / file_path
+
     try:
         # Resolve the absolute path of the file
         file_path = os.path.abspath(file_path)

@@ -20,6 +20,19 @@ This is PoC about utilizing a honeypot to determine the skill level of the attac
    - Updates the SQLite DB with the results.
 5. **SQLite DB**: Stores the data about the attacks and the attackers skill levels.
 
+## Required Software/Dependences
+
+1. **Python** (developed using 3.11)
+   
+   - FastAPI
+   - Uvicorn 
+   - joblib
+   - python-dotenv
+   - scikit-learn
+
+2. **Node.js**
+3. **Go (Golang)**
+
 ## About the ML Model
 
 ### Data Sheet

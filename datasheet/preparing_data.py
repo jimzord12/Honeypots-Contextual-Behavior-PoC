@@ -6,47 +6,48 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
+from data_analysis import load_data
 
-def load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\files\synthetic_attacks.csv'):
-    # """
-    # Loads the synthetic attacks dataset from a CSV file.
+# def load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\files\synthetic_attacks.csv'):
+#     # """
+#     # Loads the synthetic attacks dataset from a CSV file.
 
-    # Parameters:
-    # - file_path (str): The path to the CSV file.
+#     # Parameters:
+#     # - file_path (str): The path to the CSV file.
 
-    # Returns:
-    # - df (pd.DataFrame): The loaded DataFrame.
-    # """
-    try:
-        # Resolve the absolute path of the file
-        file_path = os.path.abspath(file_path)
-        print(f"The File's PAth: '{file_path}'")
+#     # Returns:
+#     # - df (pd.DataFrame): The loaded DataFrame.
+#     # """
+#     try:
+#         # Resolve the absolute path of the file
+#         file_path = os.path.abspath(file_path)
+#         print(f"The File's PAth: '{file_path}'")
         
-        # Change the working directory to the file's directory
-        file_directory = os.path.dirname(file_path)
-        os.chdir(file_directory)
-        print(f"Changed working directory to: {os.getcwd()}")
+#         # Change the working directory to the file's directory
+#         file_directory = os.path.dirname(file_path)
+#         os.chdir(file_directory)
+#         print(f"Changed working directory to: {os.getcwd()}")
 
-        # Load the data
-        df = pd.read_csv(file_path)
-        print(f"Data loaded successfully from '{file_path}'.\n")
+#         # Load the data
+#         df = pd.read_csv(file_path)
+#         print(f"Data loaded successfully from '{file_path}'.\n")
 
-        # Display all columns in the output
-        pd.set_option('display.max_columns', None)
+#         # Display all columns in the output
+#         pd.set_option('display.max_columns', None)
 
-        return df
-    except FileNotFoundError:
-        print(f"Error: The file '{file_path}' was not found. Please ensure the file exists in the specified directory.")
-        sys.exit(1)  # Exit the script with a non-zero status indicating an error
-    except pd.errors.EmptyDataError:
-        print(f"Error: The file '{file_path}' is empty. Please provide a valid CSV file with data.")
-        sys.exit(1)
-    except pd.errors.ParserError:
-        print(f"Error: The file '{file_path}' could not be parsed. Please ensure it is a well-formatted CSV file.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"An unexpected error occurred while loading the file: {e}")
-        sys.exit(1)
+#         return df
+#     except FileNotFoundError:
+#         print(f"Error: The file '{file_path}' was not found. Please ensure the file exists in the specified directory.")
+#         sys.exit(1)  # Exit the script with a non-zero status indicating an error
+#     except pd.errors.EmptyDataError:
+#         print(f"Error: The file '{file_path}' is empty. Please provide a valid CSV file with data.")
+#         sys.exit(1)
+#     except pd.errors.ParserError:
+#         print(f"Error: The file '{file_path}' could not be parsed. Please ensure it is a well-formatted CSV file.")
+#         sys.exit(1)
+#     except Exception as e:
+#         print(f"An unexpected error occurred while loading the file: {e}")
+#         sys.exit(1)
 
 if __name__ == "__main__":
     # Attempt to load the data

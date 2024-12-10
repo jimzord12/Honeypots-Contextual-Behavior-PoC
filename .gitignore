@@ -1,2 +1,86 @@
-node_modules
 logs/attacks.log
+*.tar.gz
+
+# General ignores
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# === Node.js ===
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*.local
+
+# === Go ===
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Dependency directories
+/vendor/
+
+# Go modules
+go.sum
+go.work
+go.work.sum
+
+# === Python ===
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+env/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Testing
+.coverage
+.tox/
+.nox/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Pipenv
+Pipfile
+Pipfile.lock
+
+# Pyenv
+.python-version
+
+# === OS-Specific ===
+# macOS
+*.DS_Store
+
+# Windows
+Thumbs.db
+*.lnk
+
+# Linux
+*~

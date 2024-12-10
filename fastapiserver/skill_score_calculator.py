@@ -3,8 +3,16 @@
 import json
 import pandas as pd
 
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+
+load_dotenv()
+root_path = Path(os.getenv("ROOT_PATH"))
+
 # Load the feature scaling parameters from the JSON file
-def load_scaling_params(json_file=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\feature_scaling_params.json'):
+def load_scaling_params(json_file='datasheet/feature_scaling_params.json'):
     """
     Loads feature scaling parameters from a JSON file.
     
@@ -15,7 +23,7 @@ def load_scaling_params(json_file=r'C:\Users\jimzord12\GitHub\Honeypots-Contextu
     - dict: A dictionary containing min and max values for each feature.
     """
     try:
-        with open(json_file, 'r') as f:
+        with open(root_path / json_file, 'r') as f:
             scaling_params = json.load(f)
         print(f"Scaling parameters loaded from '{json_file}'.")
         return scaling_params

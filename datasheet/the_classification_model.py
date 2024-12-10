@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
 
-df = load_data(file_path=r'C:\Users\jimzord12\GitHub\Honeypots-Contextual-Behavior-PoC\datasheet\files\final_attacks_with_skill_levels.csv')
+
+
+df = load_data(file_path='datasheet/files/final_attacks_with_skill_levels.csv')
 
 # Features and Target
 X = df[['Skill_Score_Normalized']]  # Feature
