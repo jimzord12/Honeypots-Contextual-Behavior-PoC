@@ -87,7 +87,7 @@ You must download and install the following **runtimes**:
 2. **Go** (>= 1.21)
 3. **Python** (>= 3.11)
 
-I recommend to use AI Tools to help perform this action as it differs between OSes.
+I recommend using the `auto-sys-setup.sh` to make your life easier.
 
 ### Project Setup
 
