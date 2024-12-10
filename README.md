@@ -111,6 +111,12 @@ go run --tags json1 apiserver/cmd/api/main.go
 
 ### FastAPI Python Server
 
+Go to Directory:
+
+```bash
+cd fastapiserver
+```
+
 Get the dependencies:
 
 ```bash
@@ -120,7 +126,7 @@ pip install -r requirements.txt
 To run:
 
 ```bash
-python uvicorn apiserver/main:app --reload
+python -m uvicorn main:app --reload
 ```
 
 ## How can this PoC be improved
@@ -130,5 +136,6 @@ python uvicorn apiserver/main:app --reload
 3. Train and use a more complex model to determine the skill level of the attacker.
 
 ## Personal Notes
+
 - Add the other 4 possible attack types to HASH Honeypot.
 - Write a script that starts all the services.
